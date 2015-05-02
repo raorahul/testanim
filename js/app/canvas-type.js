@@ -92,6 +92,8 @@ define, createjs, document, window
 
       this._setupArtwork();
 
+      this._setupTextBanner();
+
       // Every thing's done drawing - update stage.
       this._stage.update();
     };
@@ -133,7 +135,7 @@ define, createjs, document, window
                                });
         this._grant = new createjs.Sprite(spriteSheet, "run");
         this._grant.y = this._ground.y - 292;
-        this._grant.x = this._screenX;
+        this._grant.x = this._screenX + 10;
         this._stage.addChild(this._grant);
 
         createjs.Ticker.timingMode = createjs.Ticker.RAF;
@@ -144,6 +146,10 @@ define, createjs, document, window
 
     proto._tick = function (event) {
       this._stage.update(event);
+    };
+
+    proto._setupTextBanner = function () {
+
     };
 
     yieldmoItems.CanvasDemo = CanvasDemo;
