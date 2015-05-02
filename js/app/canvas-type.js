@@ -19,11 +19,12 @@ define, createjs, document, window
                 PRIVATE VARIABLES
        */
 
+      this._containerId = containerId;
       this._pixelRatio = window.devicePixelRatio || 1;
       this._screenX = 0;
       this._screenY = 0;
-      this._screenWidth = 750 * this._pixelRatio;
-      this._screenHeight = 1334 * this._pixelRatio;
+      this._screenWidth = 500 * this._pixelRatio;
+      this._screenHeight = 667 * this._pixelRatio;
 
       this._stageWidth = 0;
       this._stageHeight = 0;
@@ -32,25 +33,43 @@ define, createjs, document, window
       this._containerNode = null;
 
       this._stage = null;
+      this._loader = null;
+
+      this._ground = null;
+      this._grant = null;
 
 
       /*
         SETUP
        */
-      this._setup(containerId);
+      this._loadAssests();
     }
 
     proto = CanvasDemo.prototype;
-    proto._setup = function (containerId) {
+    proto._loadAssests = function () {
+      var manifest = [
+        {src: "spritesheet_grant.png", id: "grant"},
+        {src: "ground.png", id: "ground"}
+      ];
+
+      var self = this;
+      this._loader = new createjs.LoadQueue(false);
+      this._loader.addEventListener("complete", function () {
+        self._setup();
+      });
+      this._loader.loadManifest(manifest, true, "/assets/");
+    };
+
+    proto._setup = function () {
 
       // Add the canvas DOM element.
-      this._containerNode = document.getElementById(containerId);
+      this._containerNode = document.getElementById(this._containerId);
       if (!this._containerNode) {
         return;
       }
 
       this._stageWidth = this._containerNode.clientWidth * this._pixelRatio;
-      this._stageHeight = this._screenHeight + (200 * this._pixelRatio); // random 200 px padding.
+      this._stageHeight = this._screenHeight + (10 * this._pixelRatio); // random 200 px padding.
 
       this._containerNode.innerHTML = '<canvas id="canvas-type" width=" ' + this._stageWidth + '" height="' + this._stageHeight + '"></canvas>';
       this._canvasNode = document.getElementById('canvas-type');
@@ -71,6 +90,9 @@ define, createjs, document, window
       // Draw the wrapper container.
       this._setupWrapper();
 
+      this._setupArtwork();
+
+      // Every thing's done drawing - update stage.
       this._stage.update();
     };
 
@@ -84,6 +106,44 @@ define, createjs, document, window
       box.y = this._screenY;
 
       this._stage.addChild(box);
+    };
+
+    proto._setupArtwork = function () {
+
+      // Setup the ground.
+      var groundImg = this._loader.getResult("ground");
+      this._ground = new createjs.Shape();
+      this._ground.graphics.beginBitmapFill(groundImg).drawRect(0, 0, this._screenWidth, groundImg.height);
+      this._ground.tileW = groundImg.width;
+      this._ground.y = this._screenY + (this._screenHeight >> 1) - groundImg.height;
+      this._ground.x = this._screenX;
+
+      this._stage.addChild(this._ground);
+
+      // Setup grant.
+      var self = this;
+      var spriteSheet = new createjs.SpriteSheet({
+                                 framerate: 30,
+                                 "images": [self._loader.getResult("grant")],
+                                 "frames": {"regX": 0, "height": 292, "count": 64, "regY": 0, "width": 165},
+                                 // define animation, run (loops, 1.5x speed).
+                                 "animations": {
+                                   "run": [0, 25, "run", 1.5]
+                                 }
+                               });
+        this._grant = new createjs.Sprite(spriteSheet, "run");
+        this._grant.y = this._ground.y - 292;
+        this._grant.x = this._screenX;
+        this._stage.addChild(this._grant);
+
+        createjs.Ticker.timingMode = createjs.Ticker.RAF;
+        createjs.Ticker.addEventListener("tick", function (evt) {
+          self._tick(evt);
+        });
+    };
+
+    proto._tick = function (event) {
+      this._stage.update(event);
     };
 
     yieldmoItems.CanvasDemo = CanvasDemo;
