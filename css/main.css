@@ -16,5 +16,6 @@ body, html {
 
 #banner {
   font-family: '8bit', Helvetica, sans-serif;
-  font-size: 1em;
+  font-size: 0.8em;
+  display: none;
 }

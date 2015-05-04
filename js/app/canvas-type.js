@@ -38,6 +38,7 @@ define, createjs, document, window
       this._ground = null;
       this._grant = null;
 
+      this._domElem = null;
 
       /*
         SETUP
@@ -71,7 +72,8 @@ define, createjs, document, window
       this._stageWidth = this._containerNode.clientWidth * this._pixelRatio;
       this._stageHeight = this._screenHeight + (10 * this._pixelRatio); // random 200 px padding.
 
-      this._containerNode.innerHTML = '<canvas id="canvas-type" width=" ' + this._stageWidth + '" height="' + this._stageHeight + '"></canvas>';
+      // this._containerNode.innerHTML = '<canvas id="canvas-type" width=" ' + this._stageWidth + '" height="' + this._stageHeight + '"></canvas>';
+      this._containerNode.insertAdjacentHTML('beforeend', '<canvas id="canvas-type" width=" ' + this._stageWidth + '" height="' + this._stageHeight + '"></canvas>');
       this._canvasNode = document.getElementById('canvas-type');
 
       this._canvasNode.style.width =  (this._stageWidth / this._pixelRatio) + 'px';
@@ -149,7 +151,18 @@ define, createjs, document, window
     };
 
     proto._setupTextBanner = function () {
+      var domNode = document.getElementById('banner');
+      if (!domNode) {
+        return;
+      }
 
+      this._domElem = new createjs.DOMElement(domNode);
+      this._domElem.htmlElement.style.display = "block";
+      var elemWidth = 200;
+      this._domElem.htmlElement.style.width = elemWidth + 'px';
+      this._domElem.x = ((this._screenX + this._screenWidth) / this._pixelRatio) - elemWidth - 10;
+      this._domElem.y = (this._screenY + (this._screenHeight >> 1) - 200) / this._pixelRatio;
+      this._stage.addChild(this._domElem);
     };
 
     yieldmoItems.CanvasDemo = CanvasDemo;
